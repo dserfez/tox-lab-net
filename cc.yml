@@ -4,9 +4,6 @@ ssh_authorized_keys:
   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDTJT2ZKz2CcWVnMOUf7XL4dmLG+MQgb8bMEKMj+oATu0yq9EJQ/8bM1pzFmyeg6F45K0yWp2VyZhTUThc5L3cyV0IPRxUqU0+4fDDHIo9dQ5zE5Fkp13jPXBx+M7wjEMRBhd9oMwY0GhxaDWwR8ikXf7Jjp9HTlbira4HBdDvJcQ== doma
   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCw5uXH2xeCafMdzd4IUq6YSplkmbgHQxcn3SwTVfpPFcbKleITQxS5zd6TZEFkczhDxbPiS+evZOtFYARCw6JkHpwkZ7kGCx8taJaF4tVBe0laadYhZkZYiKiX1qVnmoPXvY8RDk9CLqBga/crenN7jPyhmR0yaKRt3cJjQly+q3eZ0QFvrfz9gn+826FjT1+VM/QBObYFj4wYwH8JOF933AyYydXj0izIEr/DXDaDFd5PjpzuT+X3GSVaGtcQDhQePJNUm+lb8Hx4EXH+jJy+ta+aOxW6nyEqgVoPQwkEkRBPSy65WvtrDPzKUmnLn/cLqHj/1P48UW7PftrBt66b pista@AqualtisPro.local
   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDbezz7qNl39nMSNynzJtiqmMiTODGqCE89rye0gucitGDaHlmykP5VOmjTl00p8p9p0k/Se6yPeGKcdRJGn/Cn5TU+TO2D7+LRTD+woyiB4A1+OmEhL/gXyM6a8LFAw2TO8G5lX3NDss/xmZ9iI2Wd7ZAV+dic4IeF5oE+UPouMQ== delo
-rancher:
-  system_docker:
-    args: [daemon, --log-opt, max-size=25m, --log-opt, max-file=2, -s, overlay, -b, docker-sys, --fixed-cidr, 172.18.42.1/24, --restart=false, -g, /var/lib/system-docker, -G, root, -H, 'unix:///var/run/system-docker.sock', --userland-proxy=false]
 write_files:
   - path: /opt/bin/start_lab.sh
     permissions: "0755"
@@ -17,3 +14,87 @@ write_files:
       # Launch network of routers 
       #
       
+      ### Config section
+      # Subscribers interface
+      : ${SUBS_IFACE:=enp0s9}
+      # Toxia facing interface
+      : ${TOXIA_IFACE:=enp0s8}
+      # Public/Internet facing interface
+      PUBLIC_IFACE="$(ip r | grep ^default | awk '{print $5}')"
+      ### END of Config section
+      
+      ROUTER_NAMES="subs_pe isp_peering pr dc_pe"
+      
+      BRIDGES="p-dcpe p-isp p-subspe"
+      
+      #DOCKER_IP="172.17.42.1"
+      DOCKER_IP=$(ip -o -f inet a s dev docker0 | awk '{print $4}' | cut -d"/" -f1)
+      FEATURE="-d"
+
+      workdir="$(cd $( dirname $( readlink -f con $0) ) && pwd)"
+      
+      if [ ! -x /opt/bin/pipework ] ; then
+        wget -O /opt/bin/pipework https://raw.githubusercontent.com/jpetazzo/pipework/master/pipework
+        chmod +x /opt/bin/pipework
+      fi
+      
+      #pipework="sudo $workdir/pipework --wait"
+      pipework="sudo pipework"
+      
+      # If router config files don't exist, create them
+      # (otherwise the router process wouldn't start)
+      for DIR in $ROUTER_NAMES ; do
+        DIRNAME="/opt/lab/${DIR}_conf"
+        [ -d ${DIRNAME} ] || mkdir ${DIRNAME}
+        [ -e ${DIRNAME}/bgpd.conf ] || touch ${DIRNAME}/bgpd.conf
+        [ -e ${DIRNAME}/zebra.conf ] || touch ${DIRNAME}/zebra.conf
+      done
+      
+      # Helper for starting router containers
+      start_container() {
+        docker run --cap-add=NET_ADMIN --net=none $FEATURE \
+          --name $CONTAINER -e "HOSTNAME=$CONTAINER" \
+          -v "/opt/lab/$CONTAINER"_conf/:/etc/quagga/ \
+     cycomf/docker-labrouter
+      }
+      
+      # Create internal networks
+      for BRIDGE in $BRIDGES ; do
+        IS_IT_THERE=$(brctl show | grep ^$BRIDGE | awk '{print $1}'  )
+        if [[ $BRIDGE != $IS_IT_THERE ]] ; then
+          sudo brctl addbr $BRIDGE
+        fi
+      done
+            
+      # Start router containmers
+      for CONTAINER in $ROUTER_NAMES ; do
+        docker kill $CONTAINER
+        docker rm $CONTAINER
+        start_container
+      done
+      
+      # ISP peering router network interfaces
+      $pipework p-isp -i eth0 isp_peering 0.0.0.0/0
+      $pipework $PUBLIC_IFACE -i eth1 isp_peering 0.0.0.0/0
+      
+      # DC_PE router network interfaces
+      $pipework p-dcpe -i eth0 dc_pe 0.0.0.0/0
+      $pipework $TOXIA_IFACE -i eth1 dc_pe 0.0.0.0/0
+      
+      # SUBS_PE router network interfaces
+      $pipework p-subspe -i eth0 subs_pe 0.0.0.0/0
+      $pipework $SUBS_IFACE -i eth1 subs_pe 0.0.0.0/0
+      
+      # P router network interfaces
+      $pipework p-isp -i eth0 pr 0.0.0.0/0
+      $pipework p-dcpe -i eth1 pr 0.0.0.0/0
+      $pipework p-subspe -i eth2 pr 0.0.0.0/0
+
+  - path: /opt/bin/start_lab.sh
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/bash
+      #TIMESTAMP=$(date +"%Y-%m-%d_%s")
+      TIMESTAMP=$(date +"%s")
+      tar czvf lab_${TIMESTAMP}.tar.gz /opt/lab /opt/bin
