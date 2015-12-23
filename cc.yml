@@ -90,7 +90,7 @@ write_files:
       $pipework p-dcpe -i eth1 pr 0.0.0.0/0
       $pipework p-subspe -i eth2 pr 0.0.0.0/0
 
-  - path: /opt/bin/start_lab.sh
+  - path: /opt/bin/pack_lab.sh
     permissions: "0755"
     owner: root
     content: |
