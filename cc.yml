@@ -8,7 +8,7 @@ rancher:
   system_docker:
     args: [daemon, --log-opt, max-size=25m, --log-opt, max-file=2, -s, overlay, -b, docker-sys, --fixed-cidr, 172.18.42.1/24, --restart=false, -g, /var/lib/system-docker, -G, root, -H, 'unix:///var/run/system-docker.sock', --userland-proxy=false]
 write_files:
-  - path: /opt/rancher/bin/start.sh
+  - path: /opt/bin/start_lab.sh
     permissions: "0755"
     owner: root
     content: |
@@ -17,25 +17,3 @@ write_files:
       # Launch network of routers 
       #
       
-      # Create internal neteorks
-      NETS="p_isp p-dc_pe p-subs_pe"
-      for NET in $NETS; do
-        docker network create $NET
-      done
-
-  #cloud_init:
-  #  datasources:
-  #    - url:/media/config-2
-  #services: 
-  #  isp_peering:
-  #    image: cycomf/docker-labrouter
-  #    restart: always
-  #  pr:
-  #    image: cycomf/docker-labrouter
-  #    restart: always
-  #  dc_pe:
-  #    image: cycomf/docker-labrouter
-  #    restart: always
-  #  subs_pe:
-  #    image: cycomf/docker-labrouter
-  #    restart: always
