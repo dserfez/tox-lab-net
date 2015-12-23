@@ -38,7 +38,7 @@ pipework="sudo pipework"
 # (otherwise the router process wouldn't start)
 for DIR in $ROUTER_NAMES ; do
   DIRNAME="/opt/lab/${DIR}_conf"
-  [ -d ${DIRNAME} ] || sudo mkdir ${DIRNAME}
+  [ -d ${DIRNAME} ] || sudo mkdir -p ${DIRNAME}
   [ -e ${DIRNAME}/bgpd.conf ] || sudo touch ${DIRNAME}/bgpd.conf
   [ -e ${DIRNAME}/zebra.conf ] || sudo touch ${DIRNAME}/zebra.conf
 done
