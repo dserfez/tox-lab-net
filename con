@@ -1,0 +1,25 @@
+#!/bin/bash
+
+CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
+
+declare -A CONTAINERS
+
+for CONTAINER_NAME in ${CONTAINER_NAMES} ; do
+  CONTAINERS[$CONTAINER_NAME]=$( docker inspect -f "{{.Config.Hostname}}" $CONTAINER_NAME)
+done
+
+select_container() {
+  echo "Select Container"
+  PS3="Enter container number from the left: "
+  select C in "${!CONTAINERS[@]}"
+  do
+    echo "Entering container: $C"
+    echo "Access router console inside container by executing: 'vtysh'"
+    docker exec -ti $C /bin/sh
+    break
+  done
+}
+
+select_container
+
+
