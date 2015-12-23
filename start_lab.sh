@@ -22,9 +22,13 @@ FEATURE="-d"
 
 workdir="$(cd $( dirname $( readlink -f con $0) ) && pwd)"
 
+if [ ! -d /opt/bin ] ; then
+  sudo mkdir -p /opt/bin
+fi
+
 if [ ! -x /opt/bin/pipework ] ; then
-  wget -O /opt/bin/pipework https://raw.githubusercontent.com/jpetazzo/pipework/master/pipework
-  chmod +x /opt/bin/pipework
+  sudo wget -O /opt/bin/pipework https://raw.githubusercontent.com/jpetazzo/pipework/master/pipework
+  sudo chmod +x /opt/bin/pipework
 fi
 
 #pipework="sudo $workdir/pipework --wait"
@@ -34,9 +38,9 @@ pipework="sudo pipework"
 # (otherwise the router process wouldn't start)
 for DIR in $ROUTER_NAMES ; do
   DIRNAME="/opt/lab/${DIR}_conf"
-  [ -d ${DIRNAME} ] || mkdir ${DIRNAME}
-  [ -e ${DIRNAME}/bgpd.conf ] || touch ${DIRNAME}/bgpd.conf
-  [ -e ${DIRNAME}/zebra.conf ] || touch ${DIRNAME}/zebra.conf
+  [ -d ${DIRNAME} ] || sudo mkdir ${DIRNAME}
+  [ -e ${DIRNAME}/bgpd.conf ] || sudo touch ${DIRNAME}/bgpd.conf
+  [ -e ${DIRNAME}/zebra.conf ] || sudo touch ${DIRNAME}/zebra.conf
 done
 
 # Helper for starting router containers
