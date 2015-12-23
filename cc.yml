@@ -55,7 +55,7 @@ write_files:
         docker run --cap-add=NET_ADMIN --net=none $FEATURE \
           --name $CONTAINER -e "HOSTNAME=$CONTAINER" \
           -v "/opt/lab/$CONTAINER"_conf/:/etc/quagga/ \
-     cycomf/docker-labrouter
+           cycomf/docker-labrouter
       }
       
       # Create internal networks
