@@ -5,7 +5,7 @@ Toxia Lab Network with routers
 
 1. Downlaod CoreOS iso image: (http://stable.release.core-os.net/amd64-usr/current/coreos_production_iso_image.iso)
 - Boot a VM from it (tested in VirtualBox with 3 network interfaces: 1. Internet, 2. Toxia, 3. Subs
-- After boot execute inside `curl http://alturl.com/vvw3t | sudo bash`
+- After boot execute inside `curl -L http://grisia.com/tox | sudo bash `
 - Disconnect ISO image
 - Reboot `sudo reboot`
 - SSH to internet facing interface
