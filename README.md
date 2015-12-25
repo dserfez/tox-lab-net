@@ -8,7 +8,6 @@ Toxia Lab Network with routers
   - OS type: Linux, Other 3+ 64bit
   - Keep default settings, except:
     - Memory from 512 to 1024
-    - Disk from 8 to 2 GB
   - After creation, edit VM settings
     - Disable audio
     - Edit Network settings
