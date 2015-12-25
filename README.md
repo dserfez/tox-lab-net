@@ -21,6 +21,9 @@ Toxia Lab Network with routers
 - Disconnect ISO image
 - Reboot `sudo reboot`
 - SSH to internet facing interface
+- Start routers: `start_lab.sh` (first run may take longer)
+- Enter router container: `con` and select name
+- When in container, enter router CLI: `vtysh`
 
 ## Troubleshooting
 
