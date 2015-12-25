@@ -12,7 +12,7 @@ Toxia Lab Network with routers
   - After creation, edit VM settings
     - Disable audio
     - Edit Network settings
-      - Adapter 1 from NAT to Bridged
+      - Adapter 1 from NAT to Bridged (any host interface with internet access)
       - Adapter 2 Enable, Internal Network, toxia
       - Adapter 3 Enable, Internal Network, subs
     - Storage: Attach CoreOS iso
