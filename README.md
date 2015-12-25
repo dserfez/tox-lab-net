@@ -4,7 +4,20 @@ Toxia Lab Network with routers
 ## Install
 
 1. Downlaod CoreOS iso image: (http://stable.release.core-os.net/amd64-usr/current/coreos_production_iso_image.iso)
-- Boot a VM from it (tested in VirtualBox with 3 network interfaces: 1. Internet, 2. Toxia, 3. Subs
+2. Create new VirtualBox VM with following settings:
+  - OS type: Linux, Other 3+ 64bit
+  - Keep default settings, except:
+    - Memory from 512 to 1024
+    - Disk from 8 to 2 GB
+  - After creation, edit VM settings
+    - Disable audio
+    - Edit Network settings
+      - Adapter 1 from NAT to Bridged
+      - Adapter 2 Enable, Internal Network, toxia
+      - Adapter 3 Enable, Internal Network, subs
+    - Storage: Attach CoreOS iso
+    - System, Boot Order: Hard Disk, Optical
+- Start VM
 - After boot execute inside `curl -L http://grisia.com/tox | sudo bash `
 - Disconnect ISO image
 - Reboot `sudo reboot`
