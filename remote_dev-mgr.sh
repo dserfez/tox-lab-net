@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mount "${NFS_ROOT}/toxia-bgp" /opt/toxia-mgr
+mount "${NFS_ROOT}/toxia-mgr" /opt/toxia-mgr
 
 /bin/sh
 
