@@ -39,8 +39,10 @@ pipework="sudo pipework"
 for DIR in $ROUTER_NAMES ; do
   DIRNAME="/opt/lab/${DIR}_conf"
   [ -d ${DIRNAME} ] || sudo mkdir -p ${DIRNAME}
-  [ -e ${DIRNAME}/bgpd.conf ] || sudo touch ${DIRNAME}/bgpd.conf
-  [ -e ${DIRNAME}/zebra.conf ] || sudo touch ${DIRNAME}/zebra.conf
+  #[ -e ${DIRNAME}/bgpd.conf ] || sudo touch ${DIRNAME}/bgpd.conf
+  #[ -e ${DIRNAME}/zebra.conf ] || sudo touch ${DIRNAME}/zebra.conf
+  [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/bgpd.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/bgpd.conf
+  [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/zebra.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/zebra.conf
 done
 
 # Helper for starting router containers

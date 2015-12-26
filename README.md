@@ -25,9 +25,123 @@ Toxia Lab Network with routers
 - Enter router container: `con` and select name
 - When in container, enter router CLI: `vtysh`
 
-## Troubleshooting
+## Configure
 
-### Bypass Authentication
+### Router pe
+
+#### Inside vtysh
+
+$TOXIA_IP=IP address of toxia BGP component
+
+```
+ neighbor $TOXIA_IP remote-as 65000
+ neighbor $TOXIA_IP description TOXIA
+ neighbor $TOXIA_IP update-source Loopback0
+ neighbor $TOXIA_IP prefix-list only32 in
+ neighbor $TOXIA_IP route-map deny-all out
+ neighbor $TOXIA_IP maximum-prefix 1000
+```
+
+### Router isp_peering
+
+#### in system shell
+
+Configure GRE tunnel.
+
+Adapt from Cisco IOS config:
+
+```
+interface Tunnel1
+ description Connection to TOXIA
+ ip unnumbered Loopback0
+ ip nat inside
+ ip virtual-reassembly
+ tunnel source Loopback0
+ tunnel destination 192.168.8.25
+```
+
+Add NAT for traffic going to internet
+
+* $SUBS_NET=subscriber networks
+* $TOXIA_NET=toxia network
+
+```
+iptables -t nat -I POSTROUTING -o enp0s3 -j NAT
+iptables -t nat -N NAT
+iptables -t nat -I NAT -s 192.168.6.66 -j MASQUERADE
+iptables -t nat -I NAT -s $SUBS_NET -j MASQUERADE
+iptables -t nat -I NAT -s $TOXIA_NET -j MASQUERADE
+```
+
+#### Inside vtysh
+
+Add public internet facing network to BGP
+
+```
+router bgp 65000
+  network 10.1.1.0 mask 255.255.255.0
+```
+
+Add default route through gateway on public facing interface
+
+```
+ip route 0.0.0.0 0.0.0.0 10.1.1.254
+```
+
+Add route to other side of GRE through GRE tunnel
+
+```
+ip route 192.168.6.66 255.255.255.255 Tunnel1
+```
+
+### Router isp_peering
+
+#### in system shell
+
+#### Inside vtysh
+
+Add toxia network to BGP
+
+```
+router bgp 65000
+ network 192.168.8.0
+ neighbor 192.168.8.25 remote-as 65000
+ neighbor 192.168.8.25 description TOXIA
+ neighbor 192.168.8.25 update-source lo
+ neighbor 192.168.8.25 prefix-list only32 in
+ neighbor 192.168.8.25 route-map deny-all out
+ neighbor 192.168.8.25 maximum-prefix 1000
+```
+
+### Router subs_pe
+
+#### in system shell
+
+#### Inside vtysh
+
+Add Subscribers network to BGP
+
+```
+router bgp 65000
+ network 192.168.9.0
+ neighbor 192.168.8.25 remote-as 65000
+ neighbor 192.168.8.25 description TOXIA
+ neighbor 192.168.8.25 update-source lo
+ neighbor 192.168.8.25 prefix-list only32 in
+ neighbor 192.168.8.25 route-map deny-all out
+ neighbor 192.168.8.25 maximum-prefix 1000
+```
+
+
+## Lab Host operations
+
+## Take-away changes
+
+Router configurations and changes to lab scripts can be all packed into one tar.gz archive by running `pack_lab.sh`. The archive file is created in current directory and is named _lab\_${TIMESTAMP}.tar.gz_ where _${TIMESTAMP}_ is epoch time of archive creation.
+
+The archive cotains complete content of _/opt/lab_ and _/opt/bin_
+
+### Bypass Authentication in CoreOS
 From: (https://coreos.com/os/docs/latest/booting-with-iso.html)
 
 If you need to bypass authentication in order to install, the kernel option `coreos.autologin` allows you to drop directly to a shell on a given console without prompting for a password. Useful for troubleshooting but use with caution.
