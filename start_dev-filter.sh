@@ -4,6 +4,7 @@ FILE="remote_dev-filter.sh"
 BINDIR="/opt/bin"
 STORE="https://raw.githubusercontent.com/dserfez/tox-lab-net/master"
 
+docker rm -f toxia-filter
 
 get_file() {
   wget -O "${BINDIR}/${FILE}" "${STORE}/${FILE}"
