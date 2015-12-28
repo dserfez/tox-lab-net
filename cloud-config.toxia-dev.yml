@@ -4,7 +4,14 @@ ssh_authorized_keys:
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDTJT2ZKz2CcWVnMOUf7XL4dmLG+MQgb8bMEKMj+oATu0yq9EJQ/8bM1pzFmyeg6F45K0yWp2VyZhTUThc5L3cyV0IPRxUqU0+4fDDHIo9dQ5zE5Fkp13jPXBx+M7wjEMRBhd9oMwY0GhxaDWwR8ikXf7Jjp9HTlbira4HBdDvJcQ== doma"
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCw5uXH2xeCafMdzd4IUq6YSplkmbgHQxcn3SwTVfpPFcbKleITQxS5zd6TZEFkczhDxbPiS+evZOtFYARCw6JkHpwkZ7kGCx8taJaF4tVBe0laadYhZkZYiKiX1qVnmoPXvY8RDk9CLqBga/crenN7jPyhmR0yaKRt3cJjQly+q3eZ0QFvrfz9gn+826FjT1+VM/QBObYFj4wYwH8JOF933AyYydXj0izIEr/DXDaDFd5PjpzuT+X3GSVaGtcQDhQePJNUm+lb8Hx4EXH+jJy+ta+aOxW6nyEqgVoPQwkEkRBPSy65WvtrDPzKUmnLn/cLqHj/1P48UW7PftrBt66b pista@AqualtisPro.local"
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDbezz7qNl39nMSNynzJtiqmMiTODGqCE89rye0gucitGDaHlmykP5VOmjTl00p8p9p0k/Se6yPeGKcdRJGn/Cn5TU+TO2D7+LRTD+woyiB4A1+OmEhL/gXyM6a8LFAw2TO8G5lX3NDss/xmZ9iI2Wd7ZAV+dic4IeF5oE+UPouMQ== delo"
+
 write_files:
+  - path: /usr/local/bin/brctl
+    permissions: "0755"
+    owner: root
+    content: |
+      docker run --rm -ti --privileged --cap-add=NET_ADMIN --net=host alpine:3.2 brctl $@
+
   - path: /etc/rc.local
     permissions: "0755"
     content: |

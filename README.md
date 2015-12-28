@@ -85,7 +85,7 @@ router bgp 65000
 Add default route through gateway on public facing interface
 
 ```
-ip route 0.0.0.0 0.0.0.0 10.1.1.254
+ip route 0.0.0.0 0.0.0.0 172.17.42.1
 ```
 
 Add route to other side of GRE through GRE tunnel

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Launch network of routers 
+# Launch network of routers
 #
 
 ### Config section
@@ -42,7 +42,7 @@ for DIR in $ROUTER_NAMES ; do
   #[ -e ${DIRNAME}/bgpd.conf ] || sudo touch ${DIRNAME}/bgpd.conf
   #[ -e ${DIRNAME}/zebra.conf ] || sudo touch ${DIRNAME}/zebra.conf
   [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/bgpd.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/bgpd.conf
-  [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/zebra.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/zebra.conf
+  [ -e ${DIRNAME}/zebra.conf ] || sudo wget -O ${DIRNAME}/zebra.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/zebra.conf
 done
 
 # Helper for starting router containers
@@ -84,4 +84,3 @@ $pipework $SUBS_IFACE -i eth1 subs_pe 0.0.0.0/0
 $pipework p-isp -i eth0 pr 0.0.0.0/0
 $pipework p-dcpe -i eth1 pr 0.0.0.0/0
 $pipework p-subspe -i eth2 pr 0.0.0.0/0
-

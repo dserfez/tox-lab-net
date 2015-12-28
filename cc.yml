@@ -1,4 +1,25 @@
 #cloud-config
+coreos:
+  units:
+    - name: "docker.service"
+      command: "start"
+    - name: "toxnet.service"
+      runtime: true
+      enable: true
+      content: |
+        [Unit]
+        Description=Toxia Lab Network
+        Requires=docker.service
+        After=docker.service
+
+        [Service]
+        Restart=always
+        RestartSec=5s
+        ExecStart=/bin/sh -c '/opt/bin/start_lab.sh'
+
+        [Install]
+        WantedBy=multi-user.target
+
 hostname: toxnet
 ssh_authorized_keys:
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDTJT2ZKz2CcWVnMOUf7XL4dmLG+MQgb8bMEKMj+oATu0yq9EJQ/8bM1pzFmyeg6F45K0yWp2VyZhTUThc5L3cyV0IPRxUqU0+4fDDHIo9dQ5zE5Fkp13jPXBx+M7wjEMRBhd9oMwY0GhxaDWwR8ikXf7Jjp9HTlbira4HBdDvJcQ== doma"
@@ -11,40 +32,51 @@ write_files:
     content: |
       #!/bin/bash
       #
-      # Launch network of routers 
+      # Launch network of routers
       #
-      
+
       ### Config section
       # Subscribers interface
       : ${SUBS_IFACE:=enp0s9}
       # Toxia facing interface
       : ${TOXIA_IFACE:=enp0s8}
       # Public/Internet facing interface
-      PUBLIC_IFACE="$(ip r | grep ^default | awk '{print $5}')"
+      #PUBLIC_IFACE="$(ip r | grep ^default | awk '{print $5}')"
+      PUBLIC_IFACE="docker0"
+
+      # IP for the public facing interface
+      PUBLIC_IP="172.17.42.10/24"
+
+      # IP for the interface facing toxia
+      TOXIA_IP="192.168.56.8/24"
+
+      # IP for the interface facing subscribers
+      SUBS_IP="192.168.9.9/24"
+
       ### END of Config section
-      
+
       ROUTER_NAMES="subs_pe isp_peering pr dc_pe"
-      
+
       BRIDGES="p-dcpe p-isp p-subspe"
-      
+
       #DOCKER_IP="172.17.42.1"
       DOCKER_IP=$(ip -o -f inet a s dev docker0 | awk '{print $4}' | cut -d"/" -f1)
       FEATURE="-d"
-      
+
       workdir="$(cd $( dirname $( readlink -f con $0) ) && pwd)"
-      
+
       if [ ! -d /opt/bin ] ; then
         sudo mkdir -p /opt/bin
       fi
-      
+
       if [ ! -x /opt/bin/pipework ] ; then
         sudo wget -O /opt/bin/pipework https://raw.githubusercontent.com/jpetazzo/pipework/master/pipework
         sudo chmod +x /opt/bin/pipework
       fi
-      
+
       #pipework="sudo $workdir/pipework --wait"
       pipework="sudo pipework"
-      
+
       # If router config files don't exist, create them
       # (otherwise the router process wouldn't start)
       for DIR in $ROUTER_NAMES ; do
@@ -55,7 +87,7 @@ write_files:
         [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/bgpd.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/bgpd.conf
         [ -e ${DIRNAME}/bgpd.conf ] || sudo wget -O ${DIRNAME}/zebra.conf https://raw.githubusercontent.com/dserfez/tox-lab-net/master/${DIR}_conf/zebra.conf
       done
-      
+
       # Helper for starting router containers
       start_container() {
         docker run --cap-add=NET_ADMIN --net=none $FEATURE \
@@ -63,7 +95,7 @@ write_files:
           -v "/opt/lab/$CONTAINER"_conf/:/etc/quagga/ \
            cycomf/docker-labrouter
       }
-      
+
       # Create internal networks
       for BRIDGE in $BRIDGES ; do
         IS_IT_THERE=$(brctl show | grep ^$BRIDGE | awk '{print $1}'  )
@@ -71,45 +103,45 @@ write_files:
           sudo brctl addbr $BRIDGE
         fi
       done
-      
+
       # Start router containmers
       for CONTAINER in $ROUTER_NAMES ; do
         docker kill $CONTAINER
         docker rm $CONTAINER
         start_container
       done
-      
+
       # ISP peering router network interfaces
-      $pipework p-isp -i eth0 isp_peering 0.0.0.0/0
-      $pipework $PUBLIC_IFACE -i eth1 isp_peering 0.0.0.0/0
-      
+      $pipework p-isp -i eth0 -l isp_p isp_peering 0.0.0.0/0
+      $pipework $PUBLIC_IFACE -i eth1 -l isp_out isp_peering $PUBLIC_IP
+
       # DC_PE router network interfaces
-      $pipework p-dcpe -i eth0 dc_pe 0.0.0.0/0
-      $pipework $TOXIA_IFACE -i eth1 dc_pe 0.0.0.0/0
-      
+      $pipework p-dcpe -i eth0 -l dc_p dc_pe 0.0.0.0/0
+      $pipework $TOXIA_IFACE -i eth1 -l dc_out dc_pe $TOXIA_IP
+
       # SUBS_PE router network interfaces
-      $pipework p-subspe -i eth0 subs_pe 0.0.0.0/0
-      $pipework $SUBS_IFACE -i eth1 subs_pe 0.0.0.0/0
-      
+      $pipework p-subspe -i eth0 -l subs_p subs_pe 0.0.0.0/0
+      $pipework $SUBS_IFACE -i eth1 -l subs_out subs_pe $SUBS_IP
+
       # P router network interfaces
-      $pipework p-isp -i eth0 pr 0.0.0.0/0
-      $pipework p-dcpe -i eth1 pr 0.0.0.0/0
-      $pipework p-subspe -i eth2 pr 0.0.0.0/0
-      
+      $pipework p-isp -i eth0 -l p_isp pr 0.0.0.0/0
+      $pipework p-dcpe -i eth1 -l p_dc pr 0.0.0.0/0
+      $pipework p-subspe -i eth2 -l p_subs pr 0.0.0.0/0
+
   - path: /opt/bin/con
     permissions: "0755"
     owner: root
     content: |
       #!/bin/bash
-      
+
       CONTAINER_NAMES=$(docker ps --format "{{.Names}}")
-      
+
       declare -A CONTAINERS
-      
+
       for CONTAINER_NAME in ${CONTAINER_NAMES} ; do
         CONTAINERS[$CONTAINER_NAME]=$( docker inspect -f "{{.Config.Hostname}}" $CONTAINER_NAME)
       done
-      
+
       select_container() {
         echo "Select Container"
         PS3="Enter container number from the left: "
@@ -120,10 +152,10 @@ write_files:
           docker exec -ti $C /bin/sh
           break
         done
-      }       
-        
+      }
+
       select_container
-          
+
   - path: /opt/bin/pack_lab.sh
     permissions: "0755"
     owner: root
