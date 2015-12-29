@@ -52,9 +52,9 @@ write_files:
 
       ### Config section
       # Subscribers interface
-      : ${SUBS_IFACE:=enp0s9}
+      : ${SUBS_IFACE:=subs}
       # Toxia facing interface
-      : ${TOXIA_IFACE:=enp0s8}
+      : ${TOXIA_IFACE:=toxnet}
       # Public/Internet facing interface
       #PUBLIC_IFACE="$(ip r | grep ^default | awk '{print $5}')"
       PUBLIC_IFACE="docker0"
@@ -63,18 +63,18 @@ write_files:
       PUBLIC_IP="172.17.42.10/24"
 
       # IP for the interface facing toxia
-      #TOXIA_IP="192.168.56.8/24"
-      TOXIA_IP="0.0.0.0/0"
+      TOXIA_IP="192.168.8.8/24"
+      #TOXIA_IP="0.0.0.0/0"
 
       # IP for the interface facing subscribers
-      #SUBS_IP="192.168.9.9/24"
-      SUBS_IP="0.0.0.0/0"
+      SUBS_IP="192.168.9.9/24"
+      #SUBS_IP="0.0.0.0/0"
 
       ### END of Config section
 
       ROUTER_NAMES="subs_pe isp_peering pr dc_pe"
 
-      BRIDGES="p-dcpe p-isp p-subspe"
+      BRIDGES="p-dcpe p-isp p-subspe toxnet subs"
 
       #DOCKER_IP="172.17.42.1"
       DOCKER_IP=$(ip -o -f inet a s dev docker0 | awk '{print $4}' | cut -d"/" -f1)

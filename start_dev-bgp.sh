@@ -1,6 +1,6 @@
 #!/bin/bash
 FILE="remote_dev-bgp.sh"
-
+OPTIONS=""
 BINDIR="/usr/local/bin"
 STORE="https://raw.githubusercontent.com/dserfez/tox-lab-net/master"
 
@@ -13,7 +13,7 @@ get_file() {
 
 [ -x "${BINDIR}/${FILE}" ] || get_file
 
-docker run --rm --name toxia-bgp --net=host --cap-add=NET_ADMIN \
+docker run "${OPTIONS}" --name toxia-bgp --net=host --cap-add=NET_ADMIN \
   --privileged -p 172.17.42.1:4567:4567 \
   -e NFS_ROOT="192.168.56.1:/home/davors/dev" \
   -v /opt/dev/toxia-bgp:/var/tmp \
