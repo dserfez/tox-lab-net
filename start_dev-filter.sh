@@ -1,7 +1,7 @@
 #!/bin/bash
 FILE="remote_dev-filter.sh"
 
-BINDIR="/opt/bin"
+BINDIR="/usr/local/bin"
 STORE="https://raw.githubusercontent.com/dserfez/tox-lab-net/master"
 
 docker rm -f toxia-filter
@@ -13,9 +13,9 @@ get_file() {
 
 [ -x "${BINDIR}/${FILE}" ] || get_file
 
-docker run --rm -ti --name toxia-filter --net=host --cap-add=NET_ADMIN \
+docker run --rm --name toxia-filter --net=host --cap-add=NET_ADMIN \
   --privileged -p 172.17.42.1:7979:7979 \
   -e NFS_ROOT="192.168.56.1:/home/davors/dev" \
   -v /opt/dev/toxia-filter:/var/tmp \
-  -v /opt/bin/remote_dev-filter.sh:/opt/bin/remote_dev-filter.sh \
-  toxia-filter-base /opt/bin/remote_dev-filter.sh
+  -v ${BINDIR}/remote_dev-filter.sh:${BINDIR}/remote_dev-filter.sh \
+  toxia-filter-base ${BINDIR}/remote_dev-filter.sh
