@@ -1,6 +1,6 @@
 #!/bin/bash
 FILE="remote_dev-mgr.sh"
-OPTIONS=""
+OPTIONS="-d"
 BINDIR="/usr/local/bin"
 STORE="https://raw.githubusercontent.com/dserfez/tox-lab-net/master"
 
