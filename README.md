@@ -7,17 +7,18 @@ Toxia Lab Network with routers
 2. Create new VirtualBox VM with following settings:
   - OS type: Linux, Other 3+ 64bit
   - Keep default settings, except:
-    - Memory from 512 to 1024
+    - Memory 1024MB
   - After creation, edit VM settings
     - Disable audio
     - Edit Network settings
-      - Adapter 1 from NAT to Bridged (any host interface with internet access)
-      - Adapter 2 Enable, Internal Network, toxia
-      - Adapter 3 Enable, Internal Network, subs
+      - **Stop here and ensure that:** there are 3 host-only interfaces created in VirtualBox host &gt; Preferences &gt; Network settings. First tested with Internal Network, but there was no network connectivity between router container and the host at the other side.
+      - Adapter 1 from NAT to first host-only interface (vboxnet0)
+      - Adapter 2 Enable, second host-only interface (vboxnet1), toxia
+      - Adapter 3 Enable, third host-only interface (vboxnet2), subs
     - Storage: Attach CoreOS iso
     - System, Boot Order: Hard Disk, Optical
 - Start VM
-- After boot execute inside `curl -L http://grisia.com/tox | sudo bash `
+- After boot execute inside `curl -L http://grisia.com/toxnet | sudo bash `
 - Disconnect ISO image
 - Reboot `sudo reboot`
 - SSH to internet facing interface
