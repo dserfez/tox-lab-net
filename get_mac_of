@@ -1,0 +1,13 @@
+#!/bin/bash
+
+usage() {
+  echo "$(basename $0) returns MAC address of the given interface"
+  echo "usage:"
+  echo "$(basename $0) <dev>"
+  echo "Where <dev> is the name of the device"
+  exit
+}
+
+[ -z ${1} ] && usage
+
+ip -o link show dev ${1} | cut -d "\\" -f2 | awk '{print $2}'

@@ -27,7 +27,7 @@ Toxia Lab Network with routers
 
 ## Configure
 
-### Router pe
+### Router pr
 
 #### Inside vtysh
 
@@ -60,6 +60,15 @@ interface Tunnel1
  tunnel destination 192.168.8.25
 ```
 
+Trying to adapt above config:
+
+```
+ip a a 192.168.6.6/32 dev lo
+ip tunnel add Tunnel1 mode gre remote 192.168.8.25 local 192.168.6.6
+ip link set Tunnel1 up
+```
+
+
 Add NAT for traffic going to internet
 
 * $SUBS_NET=subscriber networks
@@ -79,7 +88,7 @@ Add public internet facing network to BGP
 
 ```
 router bgp 65000
-  network 10.1.1.0 mask 255.255.255.0
+  network 172.17.42.0 mask 255.255.255.0
 ```
 
 Add default route through gateway on public facing interface
@@ -94,7 +103,7 @@ Add route to other side of GRE through GRE tunnel
 ip route 192.168.6.66 255.255.255.255 Tunnel1
 ```
 
-### Router isp_peering
+### Router dc_pe
 
 #### in system shell
 
@@ -151,3 +160,36 @@ For any console that doesn't normally get a login prompt by default be sure to c
 ```console=tty0 console=ttyS0 coreos.autologin=tty1 coreos.autologin=ttyS0```
 
 Without any argument it enables access on all consoles. Note that for the VGA console the login prompts are on virtual terminals (tty1, tty2, etc), not the VGA console itself (tty0).
+
+
+# LAB R&D notes
+
+## DC_PE to toxdata Connection
+
+### MACVLAN approach
+
+* RESULT: not working; ebtables snat not working. Maybe MACVLAN approach is wrong for ebtables snat?
+
+code:
+```
+HOST_IF_NAME="enp0s8"
+#HOST_IF_MAC="08:00:27:b4:0f:dc"
+HOST_IF_MAC="$(ip -o link show dev ${HOST_IF_NAME} | cut -d "\\" -f2 | awk '{print $2}')"
+
+CONTAINER_NAME="dc_pe"
+CONTAINER_IF_INSIDE_NAME="eth1"
+
+#CONTAINER_IF_OUTSIDE_NAME="if_dc_out"
+
+sudo ip link add link ${HOST_IF_NAME} mb_toxdata type macvlan mode bridge
+
+sudo pipework mb_toxdata -i eth1 -l if_dc_out dc_pe 0.0.0.0/0
+
+CONTAINER_IF_INSIDE_MAC="$(docker exec -ti ${CONTAINER_NAME} ip -o link show dev ${CONTAINER_IF_INSIDE_NAME} | cut -d "\\" -f2 | awk '{print $2}')"
+
+#/sbin/ip link add link enp0s8 mb_toxdata address 56:61:4f:7c:77:db type macvlan
+
+sudo ebtables -t nat -A POSTROUTING -o $HOST_IF_NAME -s ${CONTAINER_IF_INSIDE_MAC} -j snat --to-source ${HOST_IF_MAC}
+
+sudo ebtables -t nat -A PREROUTING -i $HOST_IF_NAME -d ${HOST_IF_MAC} -j dnat --to-destination ${CONTAINER_IF_INSIDE_MAC}
+```

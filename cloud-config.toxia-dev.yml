@@ -41,6 +41,23 @@ write_files:
       /usr/local/bin/start_dev-filter.sh
       /usr/local/bin/start_dev-bgp.sh
 
+  - path: /opt/bin/rt_tables
+    permissions: "0755"
+    owner: root
+    content: |
+      #
+      # reserved values
+      #
+      255	local
+      254	main
+      253	default
+      0	unspec
+      #
+      # local
+      #
+      #1	inr.ruhep
+      100 dplane
+
   - path: /usr/local/bin/start_lab.sh
     permissions: "0755"
     owner: root
