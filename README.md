@@ -21,8 +21,8 @@ Toxia Lab Network with routers
 - After boot execute inside `curl -L http://grisia.com/toxnet | sudo bash `
 - Disconnect ISO image
 - Reboot `sudo reboot`
-- SSH to internet facing interface
-- Start routers: `start_lab.sh` (first run may take longer)
+- SSH to internet facing interface (first interface)
+- Start routers: `start_lab.sh` (first run may take longer due to docker images download)
 - Enter router container: `con` and select name
 - When in container, enter router CLI: `vtysh`
 
@@ -174,7 +174,7 @@ Without any argument it enables access on all consoles. Note that for the VGA co
 code:
 ```
 HOST_IF_NAME="enp0s8"
-#HOST_IF_MAC="08:00:27:b4:0f:dc"
+# HOST_IF_MAC="08:00:27:b4:0f:dc"
 HOST_IF_MAC="$(ip -o link show dev ${HOST_IF_NAME} | cut -d "\\" -f2 | awk '{print $2}')"
 
 CONTAINER_NAME="dc_pe"
