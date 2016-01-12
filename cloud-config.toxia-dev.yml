@@ -37,9 +37,18 @@ write_files:
       #
       # Launch toxia containers
       #
+      : ${NFS_ROOT:=192.168.56.1}
       /usr/local/bin/start_dev-mgr.sh
       /usr/local/bin/start_dev-filter.sh
       /usr/local/bin/start_dev-bgp.sh
+
+  - path: /usr/local/bin/tools
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/bash
+
+      docker run --rm -ti --name tools --privileged --net=host -v /:/opt/root cycomf/labtools /bin/sh
 
   - path: /etc/iproute/rt_tables
     permissions: "0755"
