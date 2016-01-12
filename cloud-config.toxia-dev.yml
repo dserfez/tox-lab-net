@@ -50,6 +50,15 @@ write_files:
 
       docker run --rm -ti --name tools --privileged --net=host -v /:/opt/root cycomf/labtools /bin/sh
 
+  - path: /usr/local/bin/import_cloud-config_toxdev.sh
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/bash
+      # import_cloud-config_toxdev.sh
+
+      sudo ros config import -i cloud-config.yml
+
   - path: /etc/iproute/rt_tables
     permissions: "0755"
     owner: root
