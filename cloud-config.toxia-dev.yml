@@ -37,6 +37,8 @@ write_files:
       #
       # Launch toxia containers
       #
+      : ${DEV_ROOT:=/home/jaco/dev}
+
       : ${NFS_ROOT:=192.168.56.1}
       /usr/local/bin/start_dev-mgr.sh
       /usr/local/bin/start_dev-filter.sh

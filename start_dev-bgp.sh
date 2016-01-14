@@ -16,7 +16,7 @@ get_file() {
 
 [ -x "${BINDIR}/${FILE}" ] || get_file
 
-docker run "${OPTIONS}" --name toxia-bgp --net=host --cap-add=NET_ADMIN \
+docker run ${OPTIONS} --name toxia-bgp --net=host --cap-add=NET_ADMIN \
   --privileged -p 172.17.42.1:4567:4567 \
   -e NFS_ROOT="${NFS_ROOT}:${DEV_ROOT}" \
   -v /opt/dev/toxia-bgp:/var/tmp \
