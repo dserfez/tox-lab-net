@@ -20,6 +20,8 @@ get_file() {
 docker run ${OPTIONS} --name toxia-bgp --net=host --cap-add=NET_ADMIN \
   --privileged -p 172.17.42.1:4567:4567 \
   -e NFS_ROOT="${NFS_ROOT}:${DEV_ROOT}" \
-  -v /opt/dev/toxia-bgp:/var/tmp \
+  -v /opt/toxia/config/bgp:/etc/quagga \
   -v ${BINDIR}/remote_dev-bgp.sh:${BINDIR}/remote_dev-bgp.sh \
   toxia-bgp-base ${BINDIR}/remote_dev-bgp.sh
+
+#  -v /opt/dev/toxia-bgp:/var/tmp \
