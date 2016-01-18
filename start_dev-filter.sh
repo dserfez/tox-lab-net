@@ -1,6 +1,7 @@
 #!/bin/bash
 FILE="remote_dev-filter.sh"
-OPTIONS="-d"
+#OPTIONS="-d"
+OPTIONS="--rm -ti"
 BINDIR="/usr/local/bin"
 STORE="https://raw.githubusercontent.com/dserfez/tox-lab-net/master"
 
