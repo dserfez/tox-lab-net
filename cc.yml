@@ -6,6 +6,7 @@ coreos:
     - name: "toxnet.service"
       runtime: true
       enable: true
+      command: "start"
       content: |
         [Unit]
         Description=Toxia Lab Network
@@ -13,8 +14,7 @@ coreos:
         After=docker.service
 
         [Service]
-        Restart=always
-        RestartSec=5s
+        Type=oneshot
         ExecStart=/bin/sh -c '/opt/bin/start_lab.sh'
 
         [Install]
