@@ -28,6 +28,9 @@ write_files:
       for FILE in $FILES ; do
         [ -x "${BINDIR}/${FILE}" ] || get_file
       done
+      ln -s /usr/local/bin/start_dev-mgr.sh /usr/local/bin/m
+      ln -s /usr/local/bin/start_dev-bgp.sh /usr/local/bin/b
+      ln -s /usr/local/bin/start_dev-filter.sh /usr/local/bin/f
 
   - path: /usr/local/bin/start_tox.sh
     permissions: "0755"
