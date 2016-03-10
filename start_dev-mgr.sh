@@ -18,7 +18,9 @@ get_file() {
 [ -x "${BINDIR}/${FILE}" ] || get_file
 
 #docker run --rm -ti --name toxia-mgr --net=host --cap-add=NET_ADMIN \
+
 docker run ${OPTIONS} --name toxia-mgr \
+  -u root \
   --privileged -p 8081:8081 \
   -e NFS_ROOT="${NFS_ROOT}:${DEV_ROOT}" \
   -e DBFILE="/var/tmp/settings.db" -v /opt/dev/toxia-mgr:/var/tmp \
