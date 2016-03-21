@@ -17,7 +17,7 @@ get_file() {
 
 [ -x "${BINDIR}/${FILE}" ] || get_file
 
-docker run ${OPTIONS} --name toxia-filter --net=host --cap-add=NET_ADMIN \
+docker run ${OPTIONS} --name toxia-filter --net=host --cap-add=NET_ADMIN --cap-add=CAP_MKNOD \
   --privileged -p 172.17.42.1:7979:7979 \
   -e NFS_ROOT="${NFS_ROOT}:${DEV_ROOT}" \
   -v /opt/dev/toxia-filter:/var/tmp \
