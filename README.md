@@ -162,6 +162,8 @@ For any console that doesn't normally get a login prompt by default be sure to c
 
 Without any argument it enables access on all consoles. Note that for the VGA console the login prompts are on virtual terminals (tty1, tty2, etc), not the VGA console itself (tty0).
 
+# Host running toxia
+cloud-config.toxia-dev.yml
 
 # LAB R&D notes
 

@@ -10,7 +10,7 @@ write_files:
     permissions: "0755"
     owner: "root"
     content: |
-      docker run --rm -ti --privileged --cap-add=NET_ADMIN --net=host alpine:3.2 brctl $@
+      docker run --rm -ti --privileged --cap-add=NET_ADMIN --net=host alpine:3.3 brctl $@
 
   - path: /etc/rc.local
     permissions: "0755"
