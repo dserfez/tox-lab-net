@@ -1,6 +1,6 @@
 #!/bin/sh
 rpcbind
 cd /
-mount "${NFS_ROOT}/toxia-mgr" /opt/toxia-mgr
+mount -t nfs4 -o proto=tcp,port=2049 "${NFS_ROOT}/toxia-mgr" /opt/toxia-mgr
 cd /opt/toxia-mgr
 /bin/sh
